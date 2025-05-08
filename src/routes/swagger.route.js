@@ -1,6 +1,6 @@
 import { Router } from "express";
 import swaggerUi from "swagger-ui-express"
-import swaggerDocument from "../swagger.json" assert {type: "json"}
+import swaggerDocument from "../swagger.json"
 // Documentando usando o swagger
 const router = Router();
 
