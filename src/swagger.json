@@ -1,10 +1,11 @@
-{
+
+  {
     "openapi": "3.0.0",
     "info": {
       "title": "Breaking News API Documentation",
       "description": "In this documentation you will be able to consult the API end-points and also test all available routes. Do not forget to register and carry out the authorization.",
       "contact": {
-        "email": "docencia.kamuenhoeduardo75@.gmail.com"
+        "email": "docencia.kamuenhoeduardo75@gmail.com"
       },
       "version": "1.0.0"
     },
@@ -38,9 +39,9 @@
                 "examples": {
                   "Users": {
                     "value": {
-                      "name": "Olimpio Eduardo",
-                      "username": "Eduardo",
-                      "email": "e@gmail.com",
+                      "name": "Cacau Lima",
+                      "username": "cacode",
+                      "email": "clima@gmail.com",
                       "password": "12345",
                       "avatar": "https://i.imgur.com/Ry1cb5M.png",
                       "background": "https://images.wallpapersden.com/image/download/triangle-8k-blue-pattern_bGZlbmiUmZqaraWkpJRmbmdlrWZlbWU.jpg"
@@ -157,7 +158,7 @@
                 "examples": {
                   "Users": {
                     "value": {
-                      "name": "Olimpio Eduardo"
+                      "name": "Thiago Lima"
                     }
                   }
                 }
@@ -199,7 +200,7 @@
                 "examples": {
                   "User": {
                     "value": {
-                      "email": "docencia.kamuenhoeduardo75@.gmail.com",
+                      "email": "docencia.thiago@gmail.com",
                       "password": "12345"
                     }
                   }
