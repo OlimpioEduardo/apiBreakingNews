@@ -26,7 +26,7 @@ const NewsSchema = new mongoose.Schema({
         type:Array,
         require:true,
     },
-    comment:{
+    comments:{
         type:Array,
         require:true,
     },

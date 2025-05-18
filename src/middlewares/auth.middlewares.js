@@ -5,7 +5,7 @@ import userService from "../services/user.service.js"
 
 dotenv.config()
 
-export const authMiddleware =(req, res, next) =>{
+ const authMiddleware =(req, res, next) =>{
 try {
 
     const { authorization } = req.headers
@@ -46,5 +46,5 @@ try {
 }
 }
 
-
+export default authMiddleware
 

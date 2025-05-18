@@ -1,309 +1,156 @@
-import { createService, findAllService, countNews, topNewsService, findByIdService, searchByTitleService, byUserService, updateService, eraseService, likeNewsService, deleteLikeNewsService, addCommentService, deleteCommentService} from "../services/news.service.js"
+import NewsService from "../services/news.service.js";
 
+async function createNewsController(req, res) {
+  const { title, banner, text } = req.body;
+  const userId = req.userId;
 
-export const create = async (req,res)=>{
-    try{
-        const {title, text, banner} = req.body
+  try {
+    const news = await NewsService.createNewsService(
+      { title, banner, text },
+      userId
+    );
+    return res.status(201).send(news);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+}
 
-        if(!title || !text || !banner){
-            res.status(400).send({
-                message: "Submit all fields for registration"
-            })
-        }
+async function findAllNewsController(req, res) {
+  const { limit, offset } = req.query;
+  const currentUrl = req.baseUrl;
 
-        await createService({
-            title,
-            text,
-            banner,
-            user: req.userId,
-        })
+  try {
+    const news = await NewsService.findAllNewsService(
+      limit,
+      offset,
+      currentUrl
+    );
+    return res.send(news);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+}
 
-        res.status(201).send({message: "Created"})
+async function topNewsController(req, res) {
+  try {
+    const post = await postService.topNewsService();
+    return res.send(post);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+}
 
-    } catch (error){
-        res.status(500).send({ message: error.message })
-    }
-    
+async function searchNewsController(req, res) {
+  const { title } = req.query;
+
+  try {
+    const foundNews = await NewsService.searchNewsService(title);
+
+    return res.send(foundNews);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+}
+
+async function findNewsByIdController(req, res) {
+  const { id } = req.params;
+
+  try {
+    const news = await NewsService.findNewsByIdService(id);
+    return res.send(news);
+  } catch (e) {
+    res.status(404).send(e.message);
+  }
+}
+
+async function findNewsByUserIdController(req, res) {
+  const id = req.userId;
+  try {
+    const news = await NewsService.findNewsByUserIdService(id);
+    return res.send(news);
+  } catch (e) {
+    return res.status(500).send(e.message);
+  }
+}
+
+async function updateNewsController(req, res) {
+  const { title, banner, text } = req.body;
+  const { id } = req.params;
+  const userId = req.userId;
+
+  try {
+    await NewsService.updateNewsService(id, title, banner, text, userId);
+
+    return res.send({ message: "Post successfully updated!" });
+  } catch (e) {
+    return res.status(500).send(e.message);
+  }
+}
+
+async function deleteNewsController(req, res) {
+  const { id } = req.params;
+  const userId = req.userId;
+
+  try {
+    await NewsService.deleteNewsService(id, userId);
+    return res.send({ message: "Post deleted successfully" });
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+}
+
+async function likesNewsController(req, res) {
+  const { id } = req.params;
+  const userId = req.userId;
+
+  try {
+    const response = await NewsService.likesNewsService(id, userId);
+
+    return res.send(response);
+  } catch (e) {
+    return res.status(500).send(e.message);
+  }
+}
+
+async function commentNewsController(req, res) {
+  const { id: newsId } = req.params;
+  const { message } = req.body;
+  const userId = req.userId;
+
+  try {
+    await NewsService.commentNewsService(newsId, message, userId);
+
+    return res.send({
+      message: "Comment successfully completed!",
+    });
+  } catch (e) {
+    return res.status(500).send(e.message);
+  }
+}
+
+async function commentDeleteNewsController(req, res) {
+  const { id: newsId, idComment } = req.params;
+  const userId = req.userId;
+
+  try {
+    await NewsService.commentDeleteNewstService(postId, userId, idComment);
+
+    return res.send({ message: "Comment successfully removed" });
+  } catch (e) {
+    return res.status(500).send(e.message);
+  }
+}
+
+export default {
+  createNewsController,
+  findAllNewsController,
+  topNewsController,
+  searchNewsController,
+  findNewsByIdController,
+  findNewsByUserIdController,
+  updateNewsController,
+  deleteNewsController,
+  likesNewsController,
+  commentNewsController,
+  commentDeleteNewsController,
 };
-
-export const findAll = async (req, res)=>{
-    try{
-        // query paramatrer
-    let {limit, offset} = req.query // let para poder converter String para numero limites, quantos itens vou postar offset comeca sempre do 0
-
-    limit  = Number(limit) // convertendo string para numero
-    offset = Number(offset)
-
-    if(!limit){ // se n tiver limite tenho de setar um limite padrao, so poderei fazer 5 posts
-        limit = 5
-    }
-
-    if(!offset){
-        offset = 0;
-    }
-   
-    const news = await findAllService(offset, limit); 
-    const total = await countNews()
-    const currentUrl = req.baseUrl
-
-    const next = offset + limit
-    const nextUrl = next < total ? `${currentUrl}?limit=${limit}&offset=${next}`: null;
-
-    const previous = offset - limit < 0 ? null : offset - limit
-    const previousUrl= previous != null ? `${currentUrl}?limit=${limit}&offset=${previous}` : null 
-
-
-    if(news.length === 0) {
-        return res.status(400).send({message: "There are no registered news"})
-    }
-    res.send({
-        nextUrl,
-        previousUrl,
-        limit,
-        offset,
-        total,
-
-       results: news.map((item) =>({
-        id: item._id,
-        title: item.title,
-        text: item.text,
-        banner: item.banner,
-        likes: item.likes,
-        comment: item.comment,
-        name: item.user.name,
-        username: item.user.username,
-        userAvatar: item.user.avatar,
-
-       })),
-})
-    } catch (err){
-        res.status(500).send({ message: err.message })
-    }
-    
-};
-
-export const topNews = async(req, res)=>{
-    try{
-        const news = await topNewsService();
-        if(!news){
-            return res.status(400).send({message: "There is no registered post"})
-        }
-    
-        res.send({
-            news:{
-                id: news._id,
-                title: news.title,
-                text: news.text,
-                banner: news.banner,
-                likes: news.likes,
-                comment: news.comment,
-                name: news.user.name,
-                username: news.user.username,
-                userAvatar: news.user.avatar,
-            }
-            
-            
-            
-        })
-    }  catch (err){
-        res.status(500).send({ message: err.message })
-    }
-
-};
-
-export const findById = async (req, res) =>{ // encontrar uma new por id
-    try {
-        const { id } =  req.params;
-
-        const news = await findByIdService(id)
-
-        return res.send({
-            news:{
-                id: news._id,
-                title: news.title,
-                text: news.text,
-                banner: news.banner,
-                likes: news.likes,
-                comment: news.comment,
-                name: news.user.name,
-                username: news.user.username,
-                userAvatar: news.user.avatar,
-            }
-        })
-       
-
-    } catch (error) {
-        res.status(500).send({message:error.message})
-    }
-};
-
-export const searchByTitle = async (req, res) =>{
-    try {
-        const {title} = req.query;
-
-        const news = await searchByTitleService(title)
-
-        if (news.length === 0){
-            return res.send({message: "There are no news with this title"})
-        }
-
-        return res.send({
-            results: news.map((item) =>({
-                id: item._id,
-                title: item.title,
-                text: item.text,
-                banner: item.banner,
-                likes: item.likes,
-                comment: item.comment,
-                name: item.user.name,
-                username: item.user.username,
-                userAvatar: item.user.avatar,
-        
-               })),
-        })
-
-    } catch (error) {
-        res.status(500).send({message:error.message})
-    }
-}
-
-export const byUser = async (req,res) =>{
-    try {
-        const id = req.userId;
-        const news = await byUserService(id)
-        return res.send({
-            results: news.map((item) =>({
-                id: item._id,
-                title: item.title,
-                text: item.text,
-                banner: item.banner,
-                likes: item.likes,
-                comment: item.comment,
-                name: item.user.name,
-                username: item.user.username,
-                userAvatar: item.user.avatar,
-        
-               })),
-        })
-
-    } catch (error) {
-        res.status(500).send({message: error.message})
-    }
-}
-
-export const update = async (req, res)=>{
-    try {
-
-        const { title, text, banner } = req.body;
-        const{id} = req.params;
-
-        if (!title && !banner && !text){
-            res.status(400).send({message: "Submit at least one field to update the post"})
-        }
-
-        const news = await findByIdService(id)
-
-        if(String(news.user._id) !== req.userId){
-            res.status(400)
-            .send({message:" You didn't update this post"})
-        }
-        await updateService (id, title, text, banner)
-        return res.send({message:"Post sucessfully updated!"})
-        
-    } catch (error) {
-        res.status(500).send({message: error.message})
-    }
-}
-
-export const erase = async (req, res)=>{
-    try {
-
-        const {id} =req.params;
-
-        const news = await eraseService(id)
-
-        if(String(news.user._id) !== req.userId){
-            return res.status(400).send({message:"You didn'd delete this post"});
-        }
-       
-        await eraseService(id);
-
-        return res.send({message:"News deleted sucessfully"});
-        
-       
-
-    } catch (error) {
-        res.status(500).send({message: error.message})
-    }
-}
-
-export const likeNews = async(req, res)=>{
-
-    try {
-        const { id } = req.params;
-        const userId = req.userId;
-    
-        const newsLiked = await likeNewsService(id, userId)
-
-        if(!newsLiked){
-            await deleteLikeNewsService(id, userId)
-            return res.status(200).send( {message:"Likes sucessfully removed"} )
-        }
-
-        res.send({message: "Like done sucessfully"})
-    } catch (error) {
-        res.status(500).send({message: error.message})
-    }
-   
-
-
-}
-
-export const addComment = async (req, res) =>{
-
-
-    try {
-        const {id} = req.params
-    const userId = req.userId
-    const { comment }  = req.body
-
-    if(!comment){
-        return res.status(400).send({message: "Write a message to comment "})
-    }
-
-    await addCommentService(id, comment, userId)
-
-    return res.status(200).send({message: "Comment sucessfuly completed"})
-    } catch (error) {
-        res.status(500).send({message: error.message})
-}
-
-}
-
-export const deleteComment = async(req,res)=>{
-
-    try {
-        const {idNews, idComment} = req.params
-    const userId = req.userId
-
-   const commentDeleted = await deleteCommentService(idNews, idComment, userId)
-
-   /*validando se o usario logado pode excluir o comentario de um outro usuario
- se o comentario deletado. o comentario o usuario for diferente do usuario logado, acesso negado */
-
- const commentFinder = commentDeleted.comment.find(
-    (comment) => comment.idComment === idComment
-);
- if(!commentFinder){
-    return res.status(400).send({mesage: "Comment not found"})
- }
-
-   if(commentFinder.comment.userId !== userId){
-    return res.status(400).send({message: "You can't delete this comment"});
-   }
-
-    return res.send({message: "Comment sucessfuly removed"})
-    } catch (error) {
-        res.status(500).send({message: error.message})
-}
-}

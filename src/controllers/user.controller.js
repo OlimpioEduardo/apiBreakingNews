@@ -1,91 +1,65 @@
-import userService from"../services/user.service.js"
+import userService from "../services/user.service.js";
 
+async function createUserController(req, res) {
+  const { name, username, email, password, avatar, background } = req.body;
 
-const create = async (req, res)=>{
-    try { 
-        const { name, username, email, password, avatar,background } = req.body
-    
-    if (!name || !username || !email || !password || !avatar|| !background){
-        res.status(400).json({message: "submit all fields for registration"} )
-    }
-
-    const user = await userService.createService(req.body)
-
-    if (!user){
-        return res.status(400).send({message: "Error creating User!"});
-    }
-
-    res.status(201).send({
-        message: "User created sucessully",
-        user:{
-            id: user._id,
-            name,
-            username,
-            email,
-            avatar,
-            background
-        },
-        
+  try {
+    const token = await userService.createUserService({
+      name,
+      username,
+      email,
+      password,
+      avatar,
+      background,
     });
-} catch (error){
-    res.status(500).send({message: error.message})
-}
-}
-
-const findAll = async (req, res) =>{
-try   { 
-    const users = await userService.findAllService()
-    if (users.length === 0){
-        res.status(400).send({message:" There are not registered users"});
-    }
-    res.send(users)
-}catch (error){
-    res.status(500).send({message: error.message})
-
-}
+    res.status(201).send(token);
+  } catch (e) {
+    return res.status(400).send(e.message);
+  }
 }
 
-const findById = async (req, res)=>{
-  try 
-  { const user = req.id
-
-    if (!user){
-        return res.status(200).send({message:'User not found'})
-    }
-
-    res.send(user)
-} catch (error){
-    res.status(500).send({message: error.message})
-}
+async function findAllUserController(req, res) {
+  try {
+    const users = await userService.findAllUserService();
+    return res.send(users);
+  } catch (e) {
+    return res.status(404).send(e.message);
+  }
 }
 
-const update = async (req, res)=>{
+async function findUserByIdController(req, res) {
+  try {
+    const user = await userService.findUserByIdService(
+      req.params.id,
+      req.userId
+    );
+    return res.send(user);
+  } catch (e) {
+    return res.status(400).send(e.message);
+  }
+}
 
- try  { const { name, username, email, password, avatar,background } = req.body
-    
-    if (!name && !username && !email && !password && !avatar && !background){
-        res.status(400).json({message: "submit at least one field for registration"} )
-    }
-    
-    const {id, user} = req
+async function updateUserController(req, res) {
+  try {
+    const { name, username, email, password, avatar, background } = req.body;
+    const { id: userId } = req.params;
+    const userIdLogged = req.userId;
 
-
-    await userService.updateService(
-        id,
-        name,
-        username,
-        email,
-        password,
-        avatar,
-        background
+    const response = await userService.updateUserService(
+      { name, username, email, password, avatar, background },
+      userId,
+      userIdLogged
     );
 
-    res.send({message:"User sucefully updated"})
-} catch (error){
-    res.status(500).send({message: error.message})
+    return res.send(response);
+  } catch (e) {
+    res.status(400).send(e.message);
+  }
 }
-}
 
-
-
-export default {create, findAll, findById, update}   
+export default {
+  createUserController,
+  findAllUserController,
+  findUserByIdController,
+  updateUserController,
+};
