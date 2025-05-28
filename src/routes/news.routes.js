@@ -14,7 +14,7 @@ newsRouter.use(authMiddleware);
 newsRouter.post("/create", newsController.createNewsController);
 
 newsRouter.use(validId);
-newsRouter.get("/byIdPost/:id", newsController.findNewsByIdController);
+newsRouter.get("/byIdNews/:id", newsController.findNewsByIdController);
 newsRouter.get("/byUserId", newsController.findNewsByUserIdController);
 newsRouter.patch("/update/:id", newsController.updateNewsController);
 newsRouter.delete("/delete/:id", newsController.deleteNewsController);

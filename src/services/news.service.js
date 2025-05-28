@@ -13,7 +13,7 @@ async function createNewsService({ title, banner, text }, userId) {
 
   return {
     message: "Post created successfully!",
-    post: { id, title, banner, text },
+    news: { id, title, banner, text },
   };
 }
 

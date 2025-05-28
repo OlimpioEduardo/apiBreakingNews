@@ -1,14 +1,14 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import "dotenv/config";
-import userRepositories from "../repositories/user.repository.js";
+import userRepositories from "../repositories/user.repositories.js";
 
 function generateToken(id) {
-  return jwt.sign({ id: id }, process.env.SECRET, { expiresIn: 86400 });
+  return jwt.sign({ id: id }, process.env.SECRET_JWT, { expiresIn: 86400 });
 }
 
 const loginService = async ({ email, password }) => {
-  const user = await userRepositories.findByEmailUserRepository(email);
+  const user = await userRepositories.findByEmailUserRepository(email).select("+password");
 
   if (!user) throw new Error("Wrong password or username");
 

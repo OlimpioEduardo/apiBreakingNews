@@ -1,50 +1,32 @@
-import dotenv from "dotenv"
+import "dotenv/config";
 import jwt from "jsonwebtoken";
-import userService from "../services/user.service.js"
+import userRepositories from "../repositories/user.repositories.js";
 
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader)
+    return res.status(401).send({ message: "The token was not informed!" });
 
-dotenv.config()
+  const parts = authHeader.split(" "); /* ["Bearer", "asdasdasdadsadasd"] */
+  if (parts.length !== 2)
+    return res.status(401).send({ message: "Invalid token!" });
 
- const authMiddleware =(req, res, next) =>{
-try {
+  const [scheme, token] = parts;
 
-    const { authorization } = req.headers
+  if (!/^Bearer$/i.test(scheme))
+    return res.status(401).send({ message: "Malformatted Token!" });
 
-    if (!authorization){
-        return res.status(401).send({message: "Unaurization"})
-    }
-    
-    const parts = authorization.split(" ")
-// Schema e o nosso bearer no thunder client e o token e o token a ser validado
+  jwt.verify(token, process.env.SECRET_JWT, async (err, decoded) => {
+    if (err) return res.status(401).send({ message: "Invalid token!" });
 
-    const [schema, token] = parts
-//Validacao do Token
-   if (schema !=="Bearer") {
-    return res.status(401).send({message:"Token Invalid"})
-   }
-   //verificando o TOKEN
+    const user = await userRepositories.findByIdUserRepository(decoded.id);
+    if (!user || !user.id)
+      return res.status(401).send({ message: "Invalid token!" });
 
-   jwt.verify(token, process.env.SECRET_JWT, async (error, decoded)=>{
-    if (error){
-        return res.send(401).send({message: "Invalid token"})
-    }
+    req.userId = user.id;
 
-    const user = await userService.findByIdService(decoded.id)
-
-    if(!user || !user.id){
-        return res.status(401).send({message: "Invalid token!"})
-       }
-    
-       req.userId = user.id
-
-       return  next()
-    
-   });
-
-} catch (error){
-    res.status(500).send({message:error.message})
-}
+    return next();
+  });
 }
 
-export default authMiddleware
-
+export default authMiddleware;

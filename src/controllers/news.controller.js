@@ -7,11 +7,12 @@ async function createNewsController(req, res) {
   try {
     const news = await NewsService.createNewsService(
       { title, banner, text },
-      userId
+      userId 
     );
     return res.status(201).send(news);
-  } catch (e) {
-    res.status(500).send(e.message);
+    
+  } catch (error) {
+    res.status(500).send(error.message);
   }
 }
 
@@ -33,8 +34,8 @@ async function findAllNewsController(req, res) {
 
 async function topNewsController(req, res) {
   try {
-    const post = await postService.topNewsService();
-    return res.send(post);
+    const news = await NewsService.topNewsService();
+    return res.send(news);
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -104,7 +105,7 @@ async function likesNewsController(req, res) {
   const userId = req.userId;
 
   try {
-    const response = await NewsService.likesNewsService(id, userId);
+    const response = await NewsService.likeNewsService(id, userId);
 
     return res.send(response);
   } catch (e) {
@@ -133,7 +134,7 @@ async function commentDeleteNewsController(req, res) {
   const userId = req.userId;
 
   try {
-    await NewsService.commentDeleteNewstService(postId, userId, idComment);
+    await NewsService.commentDeleteNewsService(newsId, userId, idComment);
 
     return res.send({ message: "Comment successfully removed" });
   } catch (e) {
