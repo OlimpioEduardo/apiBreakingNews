@@ -13,8 +13,8 @@ async function createUserController(req, res) {
       background,
     });
     res.status(201).send(token);
-  } catch (e) {
-    return res.status(400).send(e.message);
+  } catch (error) {
+    return res.status(400).send(error.message);
   }
 }
 
@@ -22,8 +22,8 @@ async function findAllUserController(req, res) {
   try {
     const users = await userService.findAllUserService();
     return res.send(users);
-  } catch (e) {
-    return res.status(404).send(e.message);
+  } catch (error) {
+    return res.status(404).send(error.message);
   }
 }
 
@@ -34,8 +34,8 @@ async function findUserByIdController(req, res) {
       req.userId
     );
     return res.send(user);
-  } catch (e) {
-    return res.status(400).send(e.message);
+  } catch (error) {
+    return res.status(400).send(error.message);
   }
 }
 
@@ -52,8 +52,8 @@ async function updateUserController(req, res) {
     );
 
     return res.send(response);
-  } catch (e) {
-    res.status(400).send(e.message);
+  } catch (error) {
+    res.status(400).send(error.message);
   }
 }
 
